@@ -469,8 +469,25 @@ namespace diff_drive_controller{
     limiter_lin_.limit(curr_cmd.lin, last0_cmd_.lin, last1_cmd_.lin, cmd_dt);
     limiter_ang_.limit(curr_cmd.ang, last0_cmd_.ang, last1_cmd_.ang, cmd_dt);
 
-    last1_cmd_ = last0_cmd_;
-    last0_cmd_ = curr_cmd;
+    // Compute wheels velocities [m/s]:
+    double vel_left  = curr_cmd.lin - curr_cmd.ang * ws * 0.5;
+    double vel_right = curr_cmd.lin + curr_cmd.ang * ws * 0.5;
+
+    // equally scale down both wheel velocities if either one is above the linear velocity limit
+    // Note: since there is support here for asymmetric configurations (different wheel radii),
+    // there should probably be max wheel velocity limits on a per wheel basis.
+    const double vel_left_scale = limiter_lin_.limit_velocity(vel_left);
+    if (vel_left_scale < 1.0) {
+        vel_right *= vel_left_scale;
+    }
+    const double vel_right_scale = limiter_lin_.limit_velocity(vel_right);
+    if (vel_right_scale < 1.0) {
+        vel_left *= vel_right_scale;
+    }
+
+    // adjust curr_cmd
+    curr_cmd.lin = 0.5 * (vel_left + vel_right);
+    curr_cmd.ang = (vel_right - vel_left) / ws;
 
     // Publish limited velocity:
     if (publish_cmd_ && cmd_vel_pub_ && cmd_vel_pub_->trylock())
@@ -481,19 +498,19 @@ namespace diff_drive_controller{
       cmd_vel_pub_->unlockAndPublish();
     }
 
-    // Compute wheels velocities:
-    const double vel_left  = (curr_cmd.lin - curr_cmd.ang * ws / 2.0)/lwr;
-    const double vel_right = (curr_cmd.lin + curr_cmd.ang * ws / 2.0)/rwr;
-
     // Set wheels velocities:
     for (size_t i = 0; i < wheel_joints_size_; ++i)
     {
-      left_wheel_joints_[i].setCommand(vel_left);
-      right_wheel_joints_[i].setCommand(vel_right);
+      left_wheel_joints_[i].setCommand(vel_left/lwr);
+      right_wheel_joints_[i].setCommand(vel_right/rwr);
     }
 
     publishWheelData(time, period, curr_cmd, ws, lwr, rwr);
     time_previous_ = time;
+
+    // save commands
+    last1_cmd_ = last0_cmd_;
+    last0_cmd_ = curr_cmd;
   }
 
   void DiffDriveController::starting(const ros::Time& time)
