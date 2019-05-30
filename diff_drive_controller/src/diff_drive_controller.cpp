@@ -52,7 +52,7 @@ static double euclideanOfVectors(const urdf::Vector3& vec1, const urdf::Vector3&
 /*
 * \brief Check that a link exists and has a geometry collision.
 * \param link The link
-* \return true if the link has a collision element with geometry 
+* \return true if the link has a collision element with geometry
 */
 static bool hasCollisionGeometry(const urdf::LinkConstSharedPtr& link)
 {
@@ -136,7 +136,7 @@ static bool getWheelRadius(const urdf::LinkConstSharedPtr& wheel_link, double& w
     wheel_radius = (static_cast<urdf::Sphere*>(wheel_link->collision->geometry.get()))->radius;
     return true;
   }
-  
+
   ROS_ERROR_STREAM("Wheel link " << wheel_link->name << " is NOT modeled as a cylinder or sphere!");
   return false;
 }
@@ -308,6 +308,14 @@ namespace diff_drive_controller{
       cmd_vel_pub_.reset(new realtime_tools::RealtimePublisher<geometry_msgs::TwistStamped>(controller_nh, "cmd_vel_out", 100));
     }
 
+    // Velocity limitting
+    const bool success = limiter_vel_.init(ws, limiter_lin_.has_velocity_limits, limiter_lin_.has_acceleration_limits,
+            limiter_lin_.max_velocity, limiter_lin_.max_acceleration, limiter_lin_.min_acceleration,
+            limiter_ang_.max_acceleration);
+    if (!success) {
+        ROS_INFO_STREAM_NAMED(name_, "velocity limiter initialization failed!");
+    }
+
     // Wheel joint controller state:
     if (publish_wheel_joint_controller_state_)
     {
@@ -466,8 +474,12 @@ namespace diff_drive_controller{
     // Limit velocities and accelerations:
     const double cmd_dt(period.toSec());
 
-    limiter_lin_.limit(curr_cmd.lin, last0_cmd_.lin, last1_cmd_.lin, cmd_dt);
-    limiter_ang_.limit(curr_cmd.ang, last0_cmd_.ang, last1_cmd_.ang, cmd_dt);
+    VelocityLimiter::Vector vel_cmd{.x = static_cast<float>(curr_cmd.lin), .th = static_cast<float>(curr_cmd.ang)};
+    const VelocityLimiter::Vector vel_cmd_prev{
+            .x = static_cast<float>(last0_cmd_.lin), .th = static_cast<float>(last0_cmd_.ang)};
+    limiter_vel_.limit(vel_cmd, vel_cmd_prev, static_cast<float>(cmd_dt));
+    curr_cmd.lin = static_cast<double>(vel_cmd.x);
+    curr_cmd.ang = static_cast<double>(vel_cmd.th);
 
     last1_cmd_ = last0_cmd_;
     last0_cmd_ = curr_cmd;

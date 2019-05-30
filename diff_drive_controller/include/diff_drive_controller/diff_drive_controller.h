@@ -41,6 +41,7 @@
 #include <diff_drive_controller/DiffDriveControllerConfig.h>
 #include <diff_drive_controller/odometry.h>
 #include <diff_drive_controller/speed_limiter.h>
+#include <diff_drive_controller/velocity_limiter.hpp>
 #include <dynamic_reconfigure/server.h>
 #include <geometry_msgs/TwistStamped.h>
 #include <hardware_interface/joint_command_interface.h>
@@ -178,6 +179,7 @@ namespace diff_drive_controller{
     Commands last0_cmd_;
     SpeedLimiter limiter_lin_;
     SpeedLimiter limiter_ang_;
+    VelocityLimiter limiter_vel_;
 
     /// Publish limited velocity:
     bool publish_cmd_;
@@ -231,7 +233,7 @@ namespace diff_drive_controller{
 
     /// Dynamic Reconfigure server
     typedef dynamic_reconfigure::Server<DiffDriveControllerConfig> ReconfigureServer;
-    
+
     std::shared_ptr<ReconfigureServer> dyn_reconf_server_;
 
   private:
