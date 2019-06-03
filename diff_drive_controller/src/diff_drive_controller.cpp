@@ -308,10 +308,14 @@ namespace diff_drive_controller{
       cmd_vel_pub_.reset(new realtime_tools::RealtimePublisher<geometry_msgs::TwistStamped>(controller_nh, "cmd_vel_out", 100));
     }
 
-    // Velocity limitting
-    const bool success = limiter_vel_.init(ws, limiter_lin_.has_velocity_limits, limiter_lin_.has_acceleration_limits,
-            limiter_lin_.max_velocity, limiter_lin_.max_acceleration, limiter_lin_.min_acceleration,
-            limiter_ang_.max_acceleration);
+    // Velocity limiting
+    const bool has_velocity_limits = limiter_lin_.has_velocity_limits || limiter_ang_.has_velocity_limits;
+    // only support for joint acceleration limits
+    const bool has_acceleration_limits = limiter_lin_.has_acceleration_limits && limiter_ang_.has_acceleration_limits;
+    const bool success = limiter_vel_.init(ws, has_velocity_limits, has_acceleration_limits,
+        limiter_lin_.has_velocity_limits ? limiter_lin_.max_velocity : std::numeric_limits<float>::max(),
+        limiter_ang_.has_velocity_limits ? limiter_ang_.max_velocity : std::numeric_limits<float>::max(),
+        limiter_lin_.max_acceleration, limiter_lin_.min_acceleration, limiter_ang_.max_acceleration);
     if (!success) {
         ROS_INFO_STREAM_NAMED(name_, "velocity limiter initialization failed!");
     }

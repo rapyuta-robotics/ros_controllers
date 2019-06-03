@@ -20,7 +20,7 @@ VelocityLimiter::VelocityLimiter()
         , _has_acceleration_limits(false){};
 
 bool VelocityLimiter::init(float wheel_separation, bool has_velocity_limits, bool has_acceleration_limits,
-        float vel_x_max, float acc_x_max, float acc_x_min, float acc_th_max) {
+        float vel_x_max, float vel_th_max, float acc_x_max, float acc_x_min, float acc_th_max) {
     if (wheel_separation <= 0.0f) {
         return false;
     }
@@ -41,10 +41,11 @@ bool VelocityLimiter::init(float wheel_separation, bool has_velocity_limits, boo
     }
 
     if (_has_velocity_limits) {
-        if (vel_x_max <= 0) {
+        if (vel_x_max <= 0 || vel_th_max <= 0) {
             return false;
         }
         _vel_x_max = vel_x_max;
+        _vel_th_max = vel_th_max;
     }
     return true;
 };
@@ -66,6 +67,9 @@ void VelocityLimiter::limit(Vector& vel_cmd, const Vector& vel_cmd_prev, float d
 };
 
 void VelocityLimiter::limit_vel(Vector& vel_cmd) const {
+    // initial down-scaling for angular velocity limit
+    clip_both(vel_cmd.x, -_vel_x_max, _vel_x_max, vel_cmd.th, -_vel_th_max, _vel_th_max);
+
     // convert to wheel velocities
     float v_left = vel_cmd.x - vel_cmd.th * _wheel_separation * 0.5f;
     float v_right = vel_cmd.x + vel_cmd.th * _wheel_separation * 0.5f;

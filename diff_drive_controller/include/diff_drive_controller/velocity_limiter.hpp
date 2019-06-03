@@ -19,7 +19,8 @@ public:
     VelocityLimiter();
 
     bool init(float wheel_separation, bool has_velocity_limits = false, bool has_acceleration_limits = false,
-            float vel_x_max = 0.0, float acc_x_max = 0.0, float acc_x_min = 0.0, float acc_th_max = 0.0);
+            float vel_x_max = 0.0, float _vel_th_max = 0.0, float acc_x_max = 0.0, float acc_x_min = 0.0,
+            float acc_th_max = 0.0);
 
     void limit(Vector& vel_cmd, const Vector& vel_cmd_prev, const float dt) const;
 
@@ -34,6 +35,7 @@ private:
 
     float _wheel_separation;
     float _vel_x_max;
+    float _vel_th_max;
     float _mass;
     float _inertia;
     float _f_wheel_max;
