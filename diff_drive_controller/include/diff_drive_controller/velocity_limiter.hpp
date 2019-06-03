@@ -28,9 +28,9 @@ private:
     void limit_vel(Vector& vel_des) const;
     void limit_acc(Vector& vel_cmd, const Vector& vel_cmd_prev, const float dt) const;
 
-    void clip_both(
+    void downscale_both(
             float& v1, const float v1_min, const float v1_max, float& v2, const float v2_min, const float v2_max) const;
-    void clip_both(float& v1, float& v2, const float min, const float max) const;
+    void downscale_both(float& v1, float& v2, const float min, const float max) const;
     float clip(float& val, const float min, const float max) const;
 
     float _wheel_separation;

@@ -68,14 +68,14 @@ void VelocityLimiter::limit(Vector& vel_cmd, const Vector& vel_cmd_prev, float d
 
 void VelocityLimiter::limit_vel(Vector& vel_cmd) const {
     // initial down-scaling for angular velocity limit
-    clip_both(vel_cmd.x, -_vel_x_max, _vel_x_max, vel_cmd.th, -_vel_th_max, _vel_th_max);
+    downscale_both(vel_cmd.x, -_vel_x_max, _vel_x_max, vel_cmd.th, -_vel_th_max, _vel_th_max);
 
     // convert to wheel velocities
     float v_left = vel_cmd.x - vel_cmd.th * _wheel_separation * 0.5f;
     float v_right = vel_cmd.x + vel_cmd.th * _wheel_separation * 0.5f;
 
     // clip
-    clip_both(v_left, v_right, -_vel_x_max, _vel_x_max);
+    downscale_both(v_left, v_right, -_vel_x_max, _vel_x_max);
 
     // convert back to x/th velocities
     vel_cmd.x = 0.5 * (v_left + v_right);
@@ -102,7 +102,7 @@ void VelocityLimiter::limit_acc(Vector& vel_cmd, const Vector& vel_cmd_prev, con
     const float f_right_mag = right_acc ? _f_wheel_max : -_f_wheel_min;
 
     // limit
-    clip_both(f_left, -f_left_mag, f_left_mag, f_right, -f_right_mag, f_right_mag);
+    downscale_both(f_left, -f_left_mag, f_left_mag, f_right, -f_right_mag, f_right_mag);
 
     // convert back to to x/th accelerations
     acc.x = 1.0f / _mass * (f_left + f_right);
@@ -113,7 +113,7 @@ void VelocityLimiter::limit_acc(Vector& vel_cmd, const Vector& vel_cmd_prev, con
     vel_cmd.th = vel_cmd_prev.th + acc.th * dt;
 }
 
-void VelocityLimiter::clip_both(
+void VelocityLimiter::downscale_both(
         float& v1, const float v1_min, const float v1_max, float& v2, const float v2_min, const float v2_max) const {
     const float v1_scale = clip(v1, v1_min, v1_max);
     v2 *= v1_scale;
@@ -121,8 +121,8 @@ void VelocityLimiter::clip_both(
     v1 *= v2_scale;
 }
 
-void VelocityLimiter::clip_both(float& v1, float& v2, const float min, const float max) const {
-    clip_both(v1, min, max, v2, min, max);
+void VelocityLimiter::downscale_both(float& v1, float& v2, const float min, const float max) const {
+    downscale_both(v1, min, max, v2, min, max);
 }
 
 float VelocityLimiter::clip(float& val, const float min, const float max) const {
