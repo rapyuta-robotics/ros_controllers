@@ -101,16 +101,16 @@ void VelocityLimiter::limitAcc(Vector& vel_cmd, const Vector& vel_cmd_prev, cons
     const float v_left_prev = vel_cmd_prev.x - vel_cmd_prev.th * _wheel_separation * 0.5f;
     const float v_right_prev = vel_cmd_prev.x + vel_cmd_prev.th * _wheel_separation * 0.5f;
 
-    // decide if wheel speed is increasing (acceleration) or decreasing (deceleration)
-    const bool left_acc = f_left * v_left_prev >= 0.0f;
-    const bool right_acc = f_right * v_right_prev >= 0.0f;
-
-    // saturation magnitude
-    const float f_left_mag = left_acc ? _f_wheel_max : -_f_wheel_min;
-    const float f_right_mag = right_acc ? _f_wheel_max : -_f_wheel_min;
+    // force limits:
+    // - if wheel velocity is positive, acceleration is limited to within [_f_wheel_min, _f_wheel_max]
+    // - if wheel velocity is negative, acceleration is limited to within [-_f_wheel_max, -_f_wheel_min]
+    const float f_left_min = v_left_prev > 0 ? _f_wheel_min : -_f_wheel_max;
+    const float f_left_max = v_left_prev > 0 ? _f_wheel_max : -_f_wheel_min;
+    const float f_right_min = v_right_prev > 0 ? _f_wheel_min : -_f_wheel_max;
+    const float f_right_max = v_right_prev > 0 ? _f_wheel_max : -_f_wheel_min;
 
     // limit
-    downscaleBoth(f_left, -f_left_mag, f_left_mag, f_right, -f_right_mag, f_right_mag);
+    downscaleBoth(f_left, f_left_min, f_left_max, f_right, f_right_min, f_right_max);
 
     // convert back to to x/th accelerations
     acc.x = 1.0f / _mass * (f_left + f_right);
