@@ -12,7 +12,6 @@ namespace diff_drive_controller {
 VelocityLimiter::VelocityLimiter()
         : _wheel_separation(0.0f)
         , _vel_x_max(0.0f)
-        , _mass(1.0f)
         , _inertia(0.0f)
         , _f_wheel_max(0.0f)
         , _f_wheel_min(0.0f)

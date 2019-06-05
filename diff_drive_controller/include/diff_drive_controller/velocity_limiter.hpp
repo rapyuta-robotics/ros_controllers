@@ -33,10 +33,10 @@ private:
     void downscale_both(float& v1, float& v2, const float min, const float max) const;
     float clip(float& val, const float min, const float max) const;
 
+    static constexpr float _mass = 1.0f;
     float _wheel_separation;
     float _vel_x_max;
     float _vel_th_max;
-    float _mass;
     float _inertia;
     float _f_wheel_max;
     float _f_wheel_min;
