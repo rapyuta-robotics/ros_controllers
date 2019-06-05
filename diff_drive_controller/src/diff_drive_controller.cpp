@@ -312,11 +312,19 @@ namespace diff_drive_controller{
     const bool has_velocity_limits = limiter_lin_.has_velocity_limits || limiter_ang_.has_velocity_limits;
     // only support for joint acceleration limits
     const bool has_acceleration_limits = limiter_lin_.has_acceleration_limits && limiter_ang_.has_acceleration_limits;
-    const bool success = limiter_vel_.init(ws, has_velocity_limits, has_acceleration_limits,
-        limiter_lin_.has_velocity_limits ? limiter_lin_.max_velocity : std::numeric_limits<float>::max(),
-        limiter_ang_.has_velocity_limits ? limiter_ang_.max_velocity : std::numeric_limits<float>::max(),
-        limiter_lin_.max_acceleration, limiter_lin_.min_acceleration, limiter_ang_.max_acceleration);
-    if (!success) {
+    const float vel_x_max = limiter_lin_.has_velocity_limits ? static_cast<float>(limiter_lin_.max_velocity)
+                                                             : std::numeric_limits<float>::max();
+    const float vel_th_max = limiter_ang_.has_velocity_limits ? static_cast<float>(limiter_ang_.max_velocity)
+                                                              : std::numeric_limits<float>::max();
+    const VelocityLimiter::Config vel_limiter_config{.wheel_separation = static_cast<float>(ws),
+            .has_velocity_limits = static_cast<float>(has_velocity_limits),
+            .has_acceleration_limits = static_cast<float>(has_acceleration_limits),
+            .vel_x_max = vel_x_max,
+            .vel_th_max = vel_th_max,
+            .acc_x_max = static_cast<float>(limiter_lin_.max_acceleration),
+            .acc_x_min = static_cast<float>(limiter_lin_.min_acceleration),
+            .acc_th_max = static_cast<float>(limiter_ang_.max_acceleration)};
+    if (!limiter_vel_.init(vel_limiter_config)) {
         ROS_INFO_STREAM_NAMED(name_, "velocity limiter initialization failed!");
     }
 
