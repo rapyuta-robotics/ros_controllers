@@ -317,8 +317,8 @@ namespace diff_drive_controller{
     const float vel_th_max = limiter_ang_.has_velocity_limits ? static_cast<float>(limiter_ang_.max_velocity)
                                                               : std::numeric_limits<float>::max();
     const VelocityLimiter::Config vel_limiter_config{.wheel_separation = static_cast<float>(ws),
-            .has_velocity_limits = static_cast<float>(has_velocity_limits),
-            .has_acceleration_limits = static_cast<float>(has_acceleration_limits),
+            .has_velocity_limits = has_velocity_limits,
+            .has_acceleration_limits = has_acceleration_limits,
             .vel_x_max = vel_x_max,
             .vel_th_max = vel_th_max,
             .acc_x_max = static_cast<float>(limiter_lin_.max_acceleration),
