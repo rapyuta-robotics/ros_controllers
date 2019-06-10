@@ -47,7 +47,7 @@ bool VelocityLimiter::init(const Config& config) {
         _f_wheel_max = 0.5f * _mass * config.acc_x_max;
         _f_wheel_min = 0.5f * _mass * config.acc_x_min;
 
-        // J * acc_th_max = 2 * f_wheel_max / (wheel_separation / 2)
+        // J * acc_th_max = 2 * f_wheel_max * (wheel_separation / 2)
         _inertia = _wheel_separation * _f_wheel_max / config.acc_th_max;
     }
 
