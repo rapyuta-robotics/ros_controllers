@@ -38,6 +38,9 @@ TEST_F(DiffDriveControllerTest, testPublishJointTrajectoryControllerStateTopic)
     ros::Duration(0.1).sleep();
   }
 
+  // More sleeping due to sporadic failures of this test
+  ros::Duration(0.1).sleep();
+
   EXPECT_TRUE(isPublishingJointTrajectoryControllerState());
 
   // zero everything before test
