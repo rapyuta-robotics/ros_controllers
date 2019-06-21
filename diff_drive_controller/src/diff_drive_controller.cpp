@@ -435,6 +435,12 @@ namespace diff_drive_controller{
       left_pos  /= wheel_joints_size_;
       right_pos /= wheel_joints_size_;
 
+      if (true) {
+        const double temp = left_pos;
+        left_pos = -right_pos;
+        right_pos = -temp;
+      }
+
       // Estimate linear and angular velocity using joint information
       odometry_.update(left_pos, right_pos, time);
     }
@@ -506,8 +512,14 @@ namespace diff_drive_controller{
     }
 
     // Compute wheels velocities:
-    const double vel_left  = (curr_cmd.lin - curr_cmd.ang * ws / 2.0)/lwr;
-    const double vel_right = (curr_cmd.lin + curr_cmd.ang * ws / 2.0)/rwr;
+    double vel_left  = (curr_cmd.lin - curr_cmd.ang * ws / 2.0)/lwr;
+    double vel_right = (curr_cmd.lin + curr_cmd.ang * ws / 2.0)/rwr;
+
+    if (true) {
+      const double temp = vel_left;
+      vel_left = -vel_right;
+      vel_right = -temp;
+    }
 
     // Set wheels velocities:
     for (size_t i = 0; i < wheel_joints_size_; ++i)
