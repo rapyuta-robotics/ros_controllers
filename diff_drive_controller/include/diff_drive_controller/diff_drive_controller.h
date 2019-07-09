@@ -171,6 +171,9 @@ namespace diff_drive_controller{
     /// Whether to publish odometry to tf or not:
     bool enable_odom_tf_;
 
+    /// whether to define the back as the front of the robot instead
+    bool swap_front_and_back_;
+
     /// Number of wheel joints:
     size_t wheel_joints_size_;
 
