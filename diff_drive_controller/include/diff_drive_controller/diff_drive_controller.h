@@ -171,7 +171,7 @@ namespace diff_drive_controller{
     /// Whether to publish odometry to tf or not:
     bool enable_odom_tf_;
 
-    /// whether to define the back as the front of the robot instead
+    /// whether to invert the forward direction, i.e. define the back as the front of the robot
     bool invert_forward_direction_;
 
     /// Number of wheel joints:

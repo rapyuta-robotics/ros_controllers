@@ -252,7 +252,7 @@ namespace diff_drive_controller{
     ROS_INFO_STREAM_NAMED(name_, "Publishing to tf is " << (enable_odom_tf_?"enabled":"disabled"));
 
     controller_nh.param("invert_forward_direction", invert_forward_direction_, invert_forward_direction_);
-    ROS_INFO_STREAM_NAMED(name_, "Front and back are " << (invert_forward_direction_?"swapped":"not swapped"));
+    ROS_INFO_STREAM_NAMED(name_, "Forward direction is " << (invert_forward_direction_?"inverted":"not inverted"));
 
     // Velocity and acceleration limits:
     controller_nh.param("linear/x/has_velocity_limits"    , limiter_lin_.has_velocity_limits    , limiter_lin_.has_velocity_limits    );
