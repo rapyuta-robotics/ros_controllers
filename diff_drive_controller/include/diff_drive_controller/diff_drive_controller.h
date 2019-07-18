@@ -172,7 +172,7 @@ namespace diff_drive_controller{
     bool enable_odom_tf_;
 
     /// whether to define the back as the front of the robot instead
-    bool swap_front_and_back_;
+    bool invert_forward_direction_;
 
     /// Number of wheel joints:
     size_t wheel_joints_size_;

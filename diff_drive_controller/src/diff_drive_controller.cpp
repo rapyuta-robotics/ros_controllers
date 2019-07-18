@@ -156,7 +156,7 @@ namespace diff_drive_controller{
     , base_frame_id_("base_link")
     , odom_frame_id_("odom")
     , enable_odom_tf_(true)
-    , swap_front_and_back_(false)
+    , invert_forward_direction_(false)
     , wheel_joints_size_(0)
     , publish_cmd_(false)
     , publish_wheel_joint_controller_state_(false)
@@ -251,8 +251,8 @@ namespace diff_drive_controller{
     controller_nh.param("enable_odom_tf", enable_odom_tf_, enable_odom_tf_);
     ROS_INFO_STREAM_NAMED(name_, "Publishing to tf is " << (enable_odom_tf_?"enabled":"disabled"));
 
-    controller_nh.param("swap_front_and_back", swap_front_and_back_, swap_front_and_back_);
-    ROS_INFO_STREAM_NAMED(name_, "Front and back are " << (swap_front_and_back_?"swapped":"not swapped"));
+    controller_nh.param("invert_forward_direction", invert_forward_direction_, invert_forward_direction_);
+    ROS_INFO_STREAM_NAMED(name_, "Front and back are " << (invert_forward_direction_?"swapped":"not swapped"));
 
     // Velocity and acceleration limits:
     controller_nh.param("linear/x/has_velocity_limits"    , limiter_lin_.has_velocity_limits    , limiter_lin_.has_velocity_limits    );
@@ -439,7 +439,7 @@ namespace diff_drive_controller{
       left_pos  /= wheel_joints_size_;
       right_pos /= wheel_joints_size_;
 
-      if (swap_front_and_back_) {
+      if (invert_forward_direction_) {
         const double temp = left_pos;
         left_pos = -right_pos;
         right_pos = -temp;
@@ -519,7 +519,7 @@ namespace diff_drive_controller{
     double vel_left  = (curr_cmd.lin - curr_cmd.ang * ws / 2.0)/lwr;
     double vel_right = (curr_cmd.lin + curr_cmd.ang * ws / 2.0)/rwr;
 
-    if (swap_front_and_back_) {
+    if (invert_forward_direction_) {
       const double temp = vel_left;
       vel_left = -vel_right;
       vel_right = -temp;
