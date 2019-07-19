@@ -156,6 +156,7 @@ namespace diff_drive_controller{
     , base_frame_id_("base_link")
     , odom_frame_id_("odom")
     , enable_odom_tf_(true)
+    , invert_forward_direction_(false)
     , wheel_joints_size_(0)
     , publish_cmd_(false)
     , publish_wheel_joint_controller_state_(false)
@@ -249,6 +250,9 @@ namespace diff_drive_controller{
 
     controller_nh.param("enable_odom_tf", enable_odom_tf_, enable_odom_tf_);
     ROS_INFO_STREAM_NAMED(name_, "Publishing to tf is " << (enable_odom_tf_?"enabled":"disabled"));
+
+    controller_nh.param("invert_forward_direction", invert_forward_direction_, invert_forward_direction_);
+    ROS_INFO_STREAM_NAMED(name_, "Forward direction is " << (invert_forward_direction_?"inverted":"not inverted"));
 
     // Velocity and acceleration limits:
     controller_nh.param("linear/x/has_velocity_limits"    , limiter_lin_.has_velocity_limits    , limiter_lin_.has_velocity_limits    );
@@ -435,6 +439,12 @@ namespace diff_drive_controller{
       left_pos  /= wheel_joints_size_;
       right_pos /= wheel_joints_size_;
 
+      if (invert_forward_direction_) {
+        const double temp = left_pos;
+        left_pos = -right_pos;
+        right_pos = -temp;
+      }
+
       // Estimate linear and angular velocity using joint information
       odometry_.update(left_pos, right_pos, time);
     }
@@ -506,8 +516,14 @@ namespace diff_drive_controller{
     }
 
     // Compute wheels velocities:
-    const double vel_left  = (curr_cmd.lin - curr_cmd.ang * ws / 2.0)/lwr;
-    const double vel_right = (curr_cmd.lin + curr_cmd.ang * ws / 2.0)/rwr;
+    double vel_left  = (curr_cmd.lin - curr_cmd.ang * ws / 2.0)/lwr;
+    double vel_right = (curr_cmd.lin + curr_cmd.ang * ws / 2.0)/rwr;
+
+    if (invert_forward_direction_) {
+      const double temp = vel_left;
+      vel_left = -vel_right;
+      vel_right = -temp;
+    }
 
     // Set wheels velocities:
     for (size_t i = 0; i < wheel_joints_size_; ++i)
